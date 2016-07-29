@@ -42,7 +42,7 @@
     <body>
         <div class="container">
             <div class="content">
-                <div class="title">Welcome!</div>
+                <div class="title">Welcome !</div>
             </div>
         </div>
     </body>
