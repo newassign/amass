@@ -158,6 +158,8 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        //2016-08-04新增
+        App\Providers\LoggerServiceProvider::class,
     ],
 
     /*
@@ -204,6 +206,8 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
+        //2016-08-04新增
+        'Logger' => App\Util\Log\LoggerFacade::class,
     ],
 
 ];
