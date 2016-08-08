@@ -17,4 +17,5 @@ Route::get('/', function () {
 
 Route::group(['prefix' => 'systest'], function () {
     Route::controller('oss', 'Test\TestOssController');
+    Route::controller('sundry', 'Test\TestSundryController');
 });
