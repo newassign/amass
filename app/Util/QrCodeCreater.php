@@ -139,7 +139,7 @@ class QrCodeCreater
 		if (!is_array($prm) || empty($prm)) {
 			return self::$config;
 		}
-/*
+
 		$available = array_filter($prm, function ($value, $key) {
 			if ($key === 'format') {
 				return in_array($value, self::$legalPrm['format'], true);
@@ -163,47 +163,7 @@ class QrCodeCreater
 				return false;
 			}
 		}, ARRAY_FILTER_USE_BOTH);
-*/
-		$available = [];
-		foreach($prm as $key => $value){
-			if (($key === 'format') && in_array($value, self::$legalPrm['format'], true)){
-				$available[$key] = $value;
-			}
-			if (($key === 'encoding') && in_array($value, self::$legalPrm['encoding'], true)){
-				$available[$key] = $value;
-			}
-			if (($key === 'tolerancelevel') && (in_array($value, self::$legalPrm['tolerancelevel'], true))){
-				$available[$key] = $value;
-			}
-			if(($key === 'issave') && (in_array($value, self::$legalPrm['issave'], true))){
-				$available[$key] = $value;
-			}
-			if(($key === 'color') || ($key == 'bgcolor')){
-				if(isset($value['r'], $value['g'], $value['b']) && is_int($value['r']) && is_int($value['g'] && is_int($value['b']))){
-					$available[$key] = $value;
-				}
-			}
-			if(($key === 'size') || ($key == 'margin')){
-				if(is_int($value)){
-					$available[$key] = $value;
-				}
-			}
-			if($key === 'text'){
-				if(is_string($value) && !empty($value)){
-					$available[$key] = $value;
-				}
-			}
-			if($key === 'withlogo'){
-				if(in_array($value, self::$legalPrm['withlogo'], true)){
-					$available[$key] = $value;
-				}
-			}
-			if ($key === 'logo') {
-				if(isset($value['filename'], $value['percentage'], $value['absolute']) && is_string($value['filename']) && is_float($value['percentage']) && is_bool($value['absolute'])){
-					$available[$key] = $value;
-				};
-			}
-		}
+
 		return array_merge(self::$config, $available);
 	}
 }
