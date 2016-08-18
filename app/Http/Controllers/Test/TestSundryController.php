@@ -1,15 +1,19 @@
 <?php
 namespace App\Http\Controllers\Test;
 
-use App\Util\QrCodeCreater;
+use Illuminate\Support\Facades\Request;
 use App\Util\Log\LoggerFacade;
+use App\Util\QrCodeCreater;
+use App\Util\IdCard;
+
 /**
  * Author: CHQ.
  * Time: 2016/8/8 10:23
  * Usage:
  * Update:
  */
-class TestSundryController extends TestBaseController{
+class TestSundryController extends TestBaseController
+{
     public function __construct()
     {
     }
@@ -32,4 +36,13 @@ class TestSundryController extends TestBaseController{
         var_dump($res);
     }
 
+
+    public function getIdcard()
+    {
+        $id = Request::input('card');
+        var_dump($id);
+        $gender = IdCard::judgeGender($id);
+        $check = IdCard::checkIdNumber($id);
+        var_dump($gender, $check);
+    }
 }
