@@ -37,9 +37,9 @@ class IdCard
         if (18 !== strlen($idNumber)) {
             return ['valid' => false, 'msg' => '不合法的身份证号码。身份证号长度不是18位！'];
         }
-        // 前17个位置上的加权因子
+        // 前17个位置上的加权因子（注意：按照顺序依次从第1位到第17位）
         $weightFactor = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2];
-        // 余数-校验码对照表
+        // 余数-校验码对照表（注意：按照顺序依次排布）
         $checkCode = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'];
         $arr = str_split(substr($idNumber, 0, 17), 1);
         array_walk($arr, function (&$value, $key) use ($weightFactor) {
@@ -47,6 +47,6 @@ class IdCard
         });
         $remainder = array_sum($arr) % 11;
         $validCode = $checkCode[$remainder];
-        return (substr($idNumber, -1, 1) === $validCode) ? ['valid' => true, 'msg' => '合法的身份证号码'] : ['valid' => false, 'msg' => '不合法的身份证号码。计算得到的校验值为' . $validCode];
+        return (substr($idNumber, -1, 1) === $validCode) ? ['valid' => true, 'msg' => '合法的身份证号码'] : ['valid' => false, 'msg' => '不合法的身份证号码。计算得到的校验码为' . $validCode];
     }
 }
