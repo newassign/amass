@@ -749,7 +749,9 @@ class OssClient
         }
         $response = $this->auth($options);
         $result = new PutSetDeleteResult($response);
-        return $result->getData();
+        //return $result->getData();
+        // 2016-08-17改动，便于判断操作是否成功
+        return $result->isOK();
     }
 
     /**

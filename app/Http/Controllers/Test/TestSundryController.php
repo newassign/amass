@@ -7,6 +7,7 @@ use App\Util\QrCodeCreater;
 use App\Util\IdCard;
 use App\Model\TestSqlModel;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Util\OSS\OssCommon;
 
 /**
  * Author: CHQ.
@@ -48,25 +49,36 @@ class TestSundryController extends TestBaseController
         var_dump($gender, $check);
     }
 
-    public function getCurrentEnv(){
+    public function getCurrentEnv()
+    {
         $env = app()->environment();
         var_dump($env);
     }
 
-    public function getDosql(){
+    public function getDosql()
+    {
         $model = new TestSqlModel();
         $res = $model->doSql();
         var_dump($res);
     }
 
-    public function getTestExcel(){
-        $file = storage_path().'/upload/document/GB2312_simple_word.xlsx';
-        Excel::load($file, function($reader){
+    public function getTestExcel()
+    {
+        $file = storage_path() . '/upload/document/GB2312_simple_word.xlsx';
+        Excel::load($file, function ($reader) {
             //获取excel的第1张表
             $reader = $reader->getSheet(0);
             //获取表中的数据
             $result = $reader->toArray();
             var_dump($result);
         });
+    }
+
+    public function getTestOss()
+    {
+        $file = file_get_contents(storage_path() . '/upload/document/new.xlsx');
+        $mycfg = ['folder'=>'upload', 'extend' => 'xlsx'];
+        $uri = OssCommon::uploadFileByContent($file, $mycfg);
+        var_dump($uri);
     }
 }

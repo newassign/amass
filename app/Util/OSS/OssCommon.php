@@ -3,14 +3,13 @@ namespace App\Util\OSS;
 
 use OSS\OssClient;
 use OSS\Core\OssException;
-
 use App\Util\Log\LoggerFacade;
 
 /**
  * Author: CHQ.
  * Time: 2016/8/3 17:45
  * Usage: 示例程序的公共类，用于获取OssClient实例和其他公用方法
- * Update:
+ * Update: 2016/08/25 15:15 增加图片配置，改写createObjName()方法。
  */
 final class OssCommon
 {
@@ -37,6 +36,11 @@ final class OssCommon
         return self::$_instance;
     }
 
+    /**
+     * 获取OSS配置项，如果传入了$key则只返回键为$key的项，否则返回全部配置项。
+     * @param null $key
+     * @return array|string
+     */
     private static function getConfig($key = null)
     {
         $cfg = [
@@ -45,12 +49,7 @@ final class OssCommon
             'endpoint' => config('ossconfig.OSS_ENDPOINT_OUTER'),
             'bucket' => config('ossconfig.OSS_BUCKET'),
         ];
-        if(!empty($key)){
-            $cfgkeys = array_keys($cfg);
-            return in_array($key, $cfgkeys, true) ? $cfg[$key] : '';
-        }else{
-            return $cfg;
-        }
+        return (null === $key) ? $cfg : (in_array($key, array_keys($cfg), true) ? $cfg[$key] : '');
     }
 
     /**
@@ -68,148 +67,55 @@ final class OssCommon
                 'msg' => '获取OssClient实例时出现异常！异常信息为：' . $e->getMessage(),
                 'fileName' => 'oss-exception'
             ];
-            LoggerFacade::info($record['msg'], $record['fileName']);
+            Logger::info($record['msg'], $record['fileName']);
             return null;
         }
     }
 
 
     /**
-     * 判断指定名称的bucket是否存在
-     * @param $bucketName
-     * @return bool|null
-     * Todo: 当调用此方法得到结果$exist，请这样判断 若$exist === true则存在，若$exist === false则不存在。
+     * 上传文件时，生成文件名（包含路径和扩展名）
+     * @param array $mycfg 举例：$mycfg = ['folder'=>'upload', 'fileName' => 'unixtime_userid', 'extend' => 'jpg']
+     * @return string      举例：传入上述$mycfg则返回值类似于 upload/20160825/unixtime_userid.jpg
      */
-    public static function isBucketExist($bucketName)
+    private static function createObjName(array $mycfg = [])
     {
+        // 图片默认配置
+        $imgConfig = [
+            'folder' => 'common',
+            'fileName' => md5(str_random(16) . time()),
+            'extend' => 'jpg'
+        ];
+        $imgConfig = array_merge($imgConfig, $mycfg);
+        $res = $imgConfig['folder'] . '/' . date('Ymd', time()) . '/' . $imgConfig['fileName'] . '.' . $imgConfig['extend'];
+        return $res;
+    }
+
+
+    /**
+     * 上传文件（通过文件内容字符串方式）
+     * @param   string $content  要上传的文件的内容字符串，例如 $content = file_get_contents(storage_path().'/118.jpg')
+     * @param   array $mycfg     自定义配置，例如 $mycfg = ['folder'=>'upload', 'fileName' => 'unixtime_userid', 'extend' => 'jpg']
+     * @return  array            传入上述参数，返回值类似于 ['success' => true, 'data' => 'upload/20160825/unixtime_userid.jpg', 'msg' => '上传成功！']
+     */
+    public static function uploadFileByContent($content, array $mycfg = [])
+    {
+        $bucket = self::getConfig('bucket');
         $ossClient = self::getOssClient();
         if (!$ossClient) {
-            return null;
+            return ['success' => false, 'data' => '', 'msg' => '配置有误，获取OssClient实例失败！'];
         }
+        $file = self::createObjName($mycfg);
         try {
-            $res = $ossClient->doesBucketExist($bucketName);
-            return (true === $res) ? true : false;
-        } catch (OssException $e) {
-            $record = [
-                'msg' => '判断bucket是否存在时出现异常！异常信息为：' . $e->getMessage(),
-                'fileName' => 'oss-exception'
-            ];
-            LoggerFacade::info($record['msg'], $record['fileName']);
-            // TODO:由于发生异常，无法判断是否存在$bucketName，故返回null
-            return null;
-        }
-    }
-
-
-    /**
-     * 判断object是否存在
-     * @param $object
-     * @return bool|null
-     * Todo: 当调用此方法得到结果$exist，请这样判断 若$exist === true则存在，若$exist === false则不存在。
-     */
-    public static function isObjectExist($object)
-    {
-        $cfg = self::getConfig();
-        $bucket = $cfg['bucket'];
-        $ossClient = self::getOssClient();
-        if (!$ossClient) {
-            return null;
-        }
-        try{
-            $exist = $ossClient->doesObjectExist($bucket, $object);
-            return (true === $exist) ? true : false;
-        } catch(OssException $e) {
-            $record = [
-                'msg' => '判断object是否存在时出现异常！异常信息为：' . $e->getMessage(),
-                'fileName' => 'oss-exception'
-            ];
-            LoggerFacade::info($record['msg'], $record['fileName']);
-            return null;
-        }
-    }
-
-
-    /**
-     * 上传字符串作为object的内容
-     *
-     * @param OssClient $ossClient OSSClient实例
-     * @param string $bucket 存储空间名称
-     * @return null
-     */
-    public static function uploadImgByContent($content)
-    {
-        $cfg = self::getConfig();
-        $bucket = $cfg['bucket'];
-        $ossClient = self::getOssClient();
-        if (!$ossClient) {
-            return '';
-        }
-        $object = md5(time()).'.jpg';
-        try {
-            $res = $ossClient->putObject($bucket, $object, $content);
-            return $object;
+            $res = $ossClient->putObject($bucket, $file, $content);
+            return $res ? ['success' => true, 'data' => $file, 'msg' => '上传成功！'] : ['success' => false, 'data' => '', 'msg' => '上传失败！'];
         } catch (OssException $e) {
             $record = [
                 'msg' => '上传文件时出现异常！异常信息为：' . $e->getMessage(),
                 'fileName' => 'oss-exception'
             ];
-            LoggerFacade::info($record['msg'], $record['fileName']);
-            return null;
+            Logger::info($record['msg'], $record['fileName']);
+            return ['success' => false, 'data' => '', 'msg' => '上传文件时出现异常，上传失败！'];
         }
-    }
-
-    /**
-     * 列出Bucket内所有目录和文件, 注意如果符合条件的文件数目超过设置的max-keys， 用户需要使用返回的nextMarker作为入参，通过
-     * 循环调用ListObjects得到所有的文件，具体操作见下面的 listAllObjects 示例
-     *
-     * @param OssClient $ossClient OssClient实例
-     * @param string $bucket 存储空间名称
-     * @return null
-     */
-    public static function listObjects()
-    {
-        $cfg = self::getConfig();
-        $bucket = $cfg['bucket'];
-        $ossClient = self::getOssClient();
-        if (!$ossClient) {
-            return null;
-        }
-
-        $prefix = '';
-        $delimiter = '';
-        $nextMarker = '';
-        $maxkeys = 1000;
-        $options = array(
-            'delimiter' => $delimiter,
-            'prefix' => $prefix,
-            'max-keys' => $maxkeys,
-            'marker' => $nextMarker,
-        );
-        try {
-            $listObjectInfo = $ossClient->listObjects($bucket, $options);
-        } catch (OssException $e) {
-            //printf(__FUNCTION__ . ": FAILED\n");
-            //printf($e->getMessage() . "\n");
-            return;
-        }
-        //print(__FUNCTION__ . ": OK" . "\n");
-        $objectList = $listObjectInfo->getObjectList(); // 文件列表
-        $prefixList = $listObjectInfo->getPrefixList(); // 目录列表
-        if (!empty($objectList)) {
-            print("objectList:\n");
-            foreach ($objectList as $objectInfo) {
-                print($objectInfo->getKey() . "\n");
-            }
-        }
-        if (!empty($prefixList)) {
-            print("prefixList: \n");
-            foreach ($prefixList as $prefixInfo) {
-                print($prefixInfo->getPrefix() . "\n");
-            }
-        }
-    }
-
-    private static function createObjName(){
-
     }
 }
