@@ -160,6 +160,8 @@ return [
 
         //2016-08-04新增
         App\Providers\LoggerServiceProvider::class,
+        //2016-08-26新增
+        Maatwebsite\Excel\ExcelServiceProvider::class,
     ],
 
     /*
@@ -208,6 +210,8 @@ return [
 
         //2016-08-04新增
         'Logger' => App\Util\Log\LoggerFacade::class,
+        //2016-08-26新增
+        'Excel' => 'Maatwebsite\Excel\Facades\Excel',
     ],
 
 ];

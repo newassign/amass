@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Request;
 use App\Util\Log\LoggerFacade;
 use App\Util\QrCodeCreater;
 use App\Util\IdCard;
+use App\Model\TestSqlModel;
+use Maatwebsite\Excel\Facades\Excel;
 
 /**
  * Author: CHQ.
@@ -44,5 +46,27 @@ class TestSundryController extends TestBaseController
         $gender = IdCard::judgeGender($id);
         $check = IdCard::checkIdNumber($id);
         var_dump($gender, $check);
+    }
+
+    public function getCurrentEnv(){
+        $env = app()->environment();
+        var_dump($env);
+    }
+
+    public function getDosql(){
+        $model = new TestSqlModel();
+        $res = $model->doSql();
+        var_dump($res);
+    }
+
+    public function getTestExcel(){
+        $file = storage_path().'/upload/document/GB2312_simple_word.xlsx';
+        Excel::load($file, function($reader){
+            //获取excel的第1张表
+            $reader = $reader->getSheet(0);
+            //获取表中的数据
+            $result = $reader->toArray();
+            var_dump($result);
+        });
     }
 }
