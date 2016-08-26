@@ -55,11 +55,13 @@ class TestSundryController extends TestBaseController
         var_dump($env);
     }
 
-    public function getDosql()
+    public function getTestDb()
     {
         $model = new TestSqlModel();
-        $res = $model->doSql();
-        var_dump($res);
+        //$res = $model->doSql();
+        $data = $model->getSourceData();
+        $res = $model->handleOrderState($data);
+        var_dump(count($res));
     }
 
     public function getTestExcel()
