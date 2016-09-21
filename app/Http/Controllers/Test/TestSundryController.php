@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Test;
 
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Request;
 use App\Util\Log\LoggerFacade;
 use App\Util\QrCodeCreater;
@@ -76,11 +77,28 @@ class TestSundryController extends TestBaseController
         });
     }
 
-    public function getTestOss()
-    {
-        $file = file_get_contents(storage_path() . '/upload/document/new.xlsx');
-        $mycfg = ['folder'=>'upload', 'extend' => 'xlsx'];
-        $uri = OssCommon::uploadFileByContent($file, $mycfg);
-        var_dump($uri);
+    public function getSelectInsert(){
+        $model = new TestSqlModel();
+        $sourceData = $model->SelectIntoTemp();
+        var_dump($sourceData);
     }
+
+    public function getDiff(){
+        $model = new TestSqlModel();
+        $data = $model->getDays();
+        var_dump($data);
+    }
+
+    public function getEmptyTable(){
+        $tableName = 't_cashloan_customer';
+        $model = new TestSqlModel();
+        $res = $model->emptyTable($tableName);
+        var_dump($res);
+    }
+
+    public function getHash(){
+        $hash = Hash::make('newreg123');
+        var_dump($hash);
+    }
+
 }

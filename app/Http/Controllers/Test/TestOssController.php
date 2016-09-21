@@ -17,17 +17,10 @@ class TestOssController extends TestBaseController{
     }
 
     public function getRunExample(){
-        //$exist = OssCommon::isObjectExist('test_1.jpg');
-        //$content = file_get_contents(storage_path().'/upload/116.jpg');
-        //$uri = OssCommon::uploadImgByContent($content);
-        //var_dump($uri);
-        $cfg = [
-            'id' => config('ossconfig.OSS_ACCESS_ID'),
-            'secret' => config('ossconfig.OSS_ACCESS_SECRET'),
-            'endpoint' => config('ossconfig.OSS_ENDPOINT_OUTER'),
-            'bucket' => config('ossconfig.OSS_BUCKET'),
-        ];
-        var_dump(array_keys($cfg));
-        var_dump(in_array('id', array_keys($cfg), true));
+        $file = file_get_contents(storage_path() . '/upload/document/new.xlsx');
+        $mycfg = ['folder'=>'upload', 'extend' => 'xlsx'];
+        $uri = OssCommon::uploadFileByContent($file, $mycfg);
+        var_dump($uri);
     }
+
 }
