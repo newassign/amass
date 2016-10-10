@@ -101,4 +101,21 @@ class TestSundryController extends TestBaseController
         var_dump($hash);
     }
 
+
+    public function getExtractData(){
+        $file = storage_path() . '/laravel-apache2handler-fqg-info-2016-09-21.log';
+        $content = file_get_contents($file);
+        $length = mb_strlen($content, 'UTF-8');
+        //var_dump($length);
+        $failurePattern = '/^\[[^[]*登录失败/m';
+        $redirectPattern = '/^\[[^[]*已登录直接跳转/m';
+        $successPattern = '/^\[[^[]*登录成功/m';
+        var_dump(time());
+        preg_match_all($failurePattern, $content, $failure);
+        preg_match_all($redirectPattern, $content, $redirect);
+        preg_match_all($successPattern, $content, $success);
+        var_dump(time());
+        var_dump($success);
+    }
+
 }
