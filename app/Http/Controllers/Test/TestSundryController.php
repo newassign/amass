@@ -118,4 +118,8 @@ class TestSundryController extends TestBaseController
         var_dump($success);
     }
 
+    public function getPrm(){
+        $p = Request::input('in');
+        var_dump($p);
+    }
 }
